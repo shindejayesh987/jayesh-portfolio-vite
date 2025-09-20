@@ -1,5 +1,11 @@
 import React, { useEffect, useMemo, useState } from "react";
 
+type CmdItem = {
+  label: string;
+  href: string;
+  hint?: string;
+};
+
 // -------------------------------- Inline Icons (no network deps)
 function IconMonogram({ label, title }: { label: string; title: string }) {
   return (
@@ -113,8 +119,10 @@ function filterByTag(projects: { tags: string[] }[], tag: string) {
   return projects.filter((p) => p.tags.includes(tag));
 }
 
-function ThemeToggle({ value, onChange }: { value: string; onChange: (t: string) => void }) {
-  const next = value === "light" ? "dark" : value === "dark" ? "noir" : "light";
+function ThemeToggle(
+  { value, onChange }: { value: "light" | "dark" | "noir"; onChange: (t: "light" | "dark" | "noir") => void }
+) {
+  const next: "light" | "dark" | "noir" = value === "light" ? "dark" : value === "dark" ? "noir" : "light";
   return (
     <button className="btn" onClick={() => onChange(next)} title={`Theme: ${value}`}>Theme: {value}</button>
   );
@@ -197,9 +205,9 @@ function ProjectExplainer({ p }: { p: any }) {
 
 function CommandMenu({ open, onClose, onGo, projects }: { open: boolean; onClose: () => void; onGo: (href: string) => void; projects: any[]; }) {
   const [q, setQ] = useState("");
-  const filtered = React.useMemo(() => {
+  const filtered: CmdItem[]= useMemo(() => {
     const needle = q.trim().toLowerCase();
-    const base = [
+    const base: CmdItem[] = [
       { label: "Home", href: "#home" },
       { label: "Projects", href: "#projects" },
       { label: "About", href: "#about" },
@@ -362,7 +370,10 @@ export default function App() {
       </Section>
 
       {/* Details */}
-      {PROJECTS.map((p)=> (
+      {PROJECTS.map((p)=> {
+        const metrics = p.metrics ?? [];
+        const hasMetrics = metrics.length > 0;
+        return (
         <Section key={p.slug} id={p.slug} title={p.title} subtitle={p.oneLiner}>
           <div className="grid grid-2" style={{alignItems:'start'}}>
             <div>
@@ -375,9 +386,9 @@ export default function App() {
                 <ul className="muted sm" style={{paddingLeft:16}}>
                   {p.impact.map((i: string, idx: number) => <li key={idx}>{i}</li>)}
                 </ul>
-                {p.metrics?.length > 0 && (
+                {hasMetrics && (
                   <div className="grid grid-2" style={{marginTop:12}}>
-                    {p.metrics.map((m: any) => (
+                    {metrics.map((m: any) => (
                       <div key={m.label} className="card" style={{padding:'10px 12px'}}>
                         <div className="xs muted">{m.label}</div>
                         <div className="card-title" style={{fontSize:22}}>{m.value}</div>
@@ -407,7 +418,8 @@ export default function App() {
             </aside>
           </div>
         </Section>
-      ))}
+        );
+      })}
 
       {/* About */}
       <Section id="about" title="About" subtitle="A quick snapshot of who I am and what I value.">
