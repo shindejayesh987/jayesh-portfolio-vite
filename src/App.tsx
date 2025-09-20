@@ -648,7 +648,6 @@ export default function App() {
                   <div className="row gap" style={{alignItems:'center'}}>
                     <OrgLogo org={item.orgKey} label={item.school} />
                     <div>
-                      <div className="xs muted">{item.range}</div>
                       <div className="card-title">{item.degree} · {item.school}</div>
                       <div className="sm">{item.summary}</div>
                     </div>
