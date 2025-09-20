@@ -188,14 +188,12 @@ const EXPERIENCE = [
 
 const EDUCATION = [
   {
-    range: "2023—2025",
     degree: "M.S. Computer Science",
     school: "CSU Chico",
     orgKey: "csu-chico" as const,
     summary: "Graduate coursework in ML, distributed systems, and advanced software engineering.",
   },
   {
-    range: "2016—2020",
     degree: "B.E. Information Technology",
     school: "Savitribai Phule Pune University",
     orgKey: "pune-university" as const,
@@ -411,15 +409,42 @@ export default function App() {
   const projectsFiltered = React.useMemo(() => filterByTag(PROJECTS as any, filter), [filter]);
 
   const themeVars = React.useMemo(() => {
-    if (theme === "noir") return { "--bg": "#0f0f12", "--fg": "#f2f2f2", "--muted": "#a1a1a8", "--card": "#15151a", "--border": "#2a2a33" } as React.CSSProperties;
-    if (theme === "dark") return { "--bg": "#0b0b0b", "--fg": "#f5f5f5", "--muted": "#b0b0b0", "--card": "#141414", "--border": "#262626" } as React.CSSProperties;
-    return { "--bg": "#ffffff", "--fg": "#111111", "--muted": "#565b61", "--card": "#ffffff", "--border": "#e6e6e6" } as React.CSSProperties;
+    if (theme === "noir") {
+      return {
+        "--bg": "#0f0f12",
+        "--bg-accent": "radial-gradient(circle at top left, rgba(120,120,255,0.12), transparent 55%), radial-gradient(circle at bottom right, rgba(255,120,200,0.08), transparent 45%)",
+        "--fg": "#f2f2f2",
+        "--muted": "#a1a1a8",
+        "--card": "#15151a",
+        "--border": "#2a2a33",
+      } as React.CSSProperties;
+    }
+    if (theme === "dark") {
+      return {
+        "--bg": "#0b0b0b",
+        "--bg-accent": "radial-gradient(circle at top right, rgba(90,140,255,0.18), transparent 50%), radial-gradient(circle at bottom left, rgba(120,255,212,0.12), transparent 45%)",
+        "--fg": "#f5f5f5",
+        "--muted": "#b0b0b0",
+        "--card": "#141414",
+        "--border": "#262626",
+      } as React.CSSProperties;
+    }
+    return {
+      "--bg": "#fbfbfd",
+      "--bg-accent": "radial-gradient(circle at top left, rgba(147,197,253,0.35), transparent 55%), radial-gradient(circle at bottom right, rgba(196,181,253,0.28), transparent 45%)",
+      "--fg": "#111111",
+      "--muted": "#565b61",
+      "--card": "#ffffff",
+      "--border": "#e6e6e6",
+    } as React.CSSProperties;
   }, [theme]);
 
   return (
     <div style={themeVars as any} className="root">
       <style>{`
-        .root { background: var(--bg); color: var(--fg); font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial; }
+        .root { position:relative; min-height:100vh; background: var(--bg); color: var(--fg); font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial; }
+        .root::before { content:""; position:fixed; inset:0; pointer-events:none; background: var(--bg-accent); opacity:0.9; z-index:-2; }
+        .root::after { content:""; position:fixed; inset:0; pointer-events:none; background: linear-gradient(180deg, rgba(255,255,255,0.04), transparent 30%); z-index:-3; }
         .container { max-width: 1100px; margin: 0 auto; padding: 0 16px; }
         .header { position: sticky; top: 0; backdrop-filter: saturate(150%) blur(6px); background: color-mix(in oklab, var(--bg) 80%, white 20%); border-bottom: 1px solid var(--border); z-index: 20; }
         .head-row { display:flex; align-items:center; justify-content:space-between; padding: 10px 16px; }
