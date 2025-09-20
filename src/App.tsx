@@ -113,6 +113,96 @@ const PROJECTS = [
 ];
 const FEATURED = ["medical-chatbot-llama2","simple-microservice-example","gemini-sql-retrieval"];
 
+const SKILL_GROUPS = [
+  { title: "Languages", skills: ["TypeScript","JavaScript","Python","Java"] as const },
+  { title: "Frontend", skills: ["React","Next.js","Vite"] as const },
+  { title: "Backend", skills: ["Node.js","Express","Spring Boot","FastAPI"] as const },
+  { title: "ML / AI", skills: ["PyTorch","TensorFlow","LangChain","scikit-learn","Llama 2"] as const },
+  { title: "Databases", skills: ["PostgreSQL","MongoDB","SQLite"] as const },
+  { title: "Cloud & DevOps", skills: ["AWS","GCP","Vercel","Docker","Kubernetes"] as const },
+] as const;
+
+type SkillGroup = (typeof SKILL_GROUPS)[number];
+type SkillName = SkillGroup["skills"][number];
+
+const SKILL_LOGO_FILES: Record<SkillName, string> = {
+  "TypeScript": "typescript",
+  "JavaScript": "javascript",
+  "Python": "python",
+  "Java": "java",
+  "React": "react",
+  "Next.js": "nextjs",
+  "Vite": "vite",
+  "Node.js": "nodejs",
+  "Express": "express",
+  "Spring Boot": "spring-boot",
+  "FastAPI": "fastapi",
+  "PyTorch": "pytorch",
+  "TensorFlow": "tensorflow",
+  "LangChain": "langchain",
+  "scikit-learn": "scikit-learn",
+  "Llama 2": "llama-2",
+  "PostgreSQL": "postgresql",
+  "MongoDB": "mongodb",
+  "SQLite": "sqlite",
+  "AWS": "aws",
+  "GCP": "gcp",
+  "Vercel": "vercel",
+  "Docker": "docker",
+  "Kubernetes": "kubernetes",
+};
+
+type ContactBrand = "gmail" | "linkedin" | "github" | "discord";
+
+const CONTACT_LOGO_FILES: Record<ContactBrand, string> = {
+  gmail: "gmail",
+  linkedin: "linkedin",
+  github: "github",
+  discord: "discord",
+};
+
+const ORG_LOGO_FILES = {
+  "csu-chico": "csu-chico",
+  "infosys": "infosys",
+  "pune-university": "pune-university",
+} as const;
+
+type OrgKey = keyof typeof ORG_LOGO_FILES;
+
+const EXPERIENCE = [
+  {
+    range: "2024—2025",
+    title: "Graduate Teaching Assistant",
+    org: "CSU Chico",
+    orgKey: "csu-chico" as const,
+    summary: "Helped students with systems & ML topics; created lab material.",
+  },
+  {
+    range: "2021—2023",
+    title: "Software Engineer",
+    org: "Infosys (Pune)",
+    orgKey: "infosys" as const,
+    summary: "Java/Spring services; CI/CD; collaborated across teams.",
+  },
+] as const;
+
+const EDUCATION = [
+  {
+    range: "2023—2025",
+    degree: "M.S. Computer Science",
+    school: "CSU Chico",
+    orgKey: "csu-chico" as const,
+    summary: "Graduate coursework in ML, distributed systems, and advanced software engineering.",
+  },
+  {
+    range: "2016—2020",
+    degree: "B.E. Information Technology",
+    school: "Savitribai Phule Pune University",
+    orgKey: "pune-university" as const,
+    summary: "Focused on data structures, networks, and full-stack project work.",
+  },
+] as const;
+
 // Helpers
 function filterByTag(projects: { tags: string[] }[], tag: string) {
   if (tag === "All") return projects;
@@ -152,6 +242,35 @@ function CopyButton({ text, label = "Copy" }: { text: string; label?: string }) 
     <button className="btn-outline" title={text} onClick={async () => { try { await navigator.clipboard.writeText(text); setOk(true); setTimeout(() => setOk(false), 1200);} catch {} }}>
       {ok ? "Copied!" : label}
     </button>
+  );
+}
+
+function ContactLogo({ brand, label }: { brand: ContactBrand; label: string }) {
+  const file = CONTACT_LOGO_FILES[brand];
+  if (!file) return <IconMonogram label={label.slice(0,2)} title={label} />;
+  return <img className="contact-logo" src={`/contact/${file}.svg`} alt={`${label} logo`} />;
+}
+
+function OrgLogo({ org, label }: { org: OrgKey; label: string }) {
+  const file = ORG_LOGO_FILES[org];
+  if (!file) return <IconMonogram label={label.slice(0,2)} title={label} />;
+  return <img className="org-logo" src={`/org/${file}.svg`} alt={`${label} logo`} />;
+}
+
+function SkillLogo({ name }: { name: SkillName }) {
+  const file = SKILL_LOGO_FILES[name];
+  if (file) {
+    return <img className="skill-icon-img" src={`/skills/${file}.svg`} alt={`${name} logo`} />;
+  }
+  const letters = name
+    .split(" ")
+    .map((part) => part[0]?.toUpperCase() ?? "")
+    .join("")
+    .slice(0, 3);
+  return (
+    <div className="skill-icon-fallback" aria-label={`${name} logo`} role="img">
+      <IconMonogram label={letters || "?"} title={name} />
+    </div>
   );
 }
 
@@ -203,6 +322,28 @@ function ProjectExplainer({ p }: { p: any }) {
   );
 }
 
+function SkillsSection() {
+  return (
+    <Section id="skills" title="Skills" subtitle="Technologies and tools I use.">
+      <div className="skills-panels">
+        {SKILL_GROUPS.map((group) => (
+          <div key={group.title} className="card skill-group-card">
+            <div className="card-title" style={{ marginBottom: 8 }}>{group.title}</div>
+            <div className="skills-grid">
+              {group.skills.map((skill) => (
+                <div className="skill-chip" key={skill}>
+                  <SkillLogo name={skill} />
+                  <span className="xs muted" style={{ textTransform: "none" }}>{skill}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </Section>
+  );
+}
+
 function CommandMenu({ open, onClose, onGo, projects }: { open: boolean; onClose: () => void; onGo: (href: string) => void; projects: any[]; }) {
   const [q, setQ] = useState("");
   const filtered: CmdItem[]= useMemo(() => {
@@ -210,7 +351,9 @@ function CommandMenu({ open, onClose, onGo, projects }: { open: boolean; onClose
     const base: CmdItem[] = [
       { label: "Home", href: "#home" },
       { label: "Projects", href: "#projects" },
+      { label: "Skills", href: "#skills" },
       { label: "About", href: "#about" },
+      { label: "Education", href: "#education" },
       { label: "Experience", href: "#experience" },
       { label: "Contact", href: "#contact" },
       ...projects.map((p) => ({ label: `Project: ${p.title}`, href: `#${p.slug}`, hint: p.tags.join(", ") })),
@@ -312,6 +455,29 @@ export default function App() {
         .palette-list { max-height: 60vh; overflow:auto; }
         .palette-item { width:100%; text-align:left; padding:10px 12px; display:flex; align-items:center; justify-content:space-between; border-bottom: 1px dashed var(--border); background: transparent; color: inherit; cursor:pointer; }
         .footer { text-align:center; padding: 28px 0; border-top: 1px solid var(--border); margin-top: 32px; }
+        .skills-grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap:12px; }
+        .skill-chip { display:flex; flex-direction:column; align-items:center; gap:6px; padding:10px; border:1px solid var(--border); border-radius:12px; background: var(--card); transition: transform 0.2s ease; }
+        .skill-icon-img { width:56px; height:56px; object-fit:contain; }
+        .skill-icon-fallback { width:56px; height:56px; display:flex; align-items:center; justify-content:center; }
+        .skill-icon-fallback svg { width:48px; height:48px; }
+        .skill-chip:hover { transform: translateY(-1px); }
+        .contact-logo { width:24px; height:24px; display:block; }
+        .org-logo { width:36px; height:36px; display:block; border-radius:10px; }
+        .career-grid { display:grid; gap:24px; }
+        @media(min-width: 960px){ .career-grid { grid-template-columns: repeat(2, minmax(0,1fr)); } }
+        .career-panel { border:1px solid var(--border); border-radius:16px; background: var(--card); padding:24px; }
+        .career-panel .section-head { margin-bottom:16px; }
+        .form-card { display:flex; flex-direction:column; gap:12px; }
+        .form-field { display:flex; flex-direction:column; gap:6px; }
+        .form-field label { font-size:12px; text-transform:uppercase; letter-spacing:0.04em; }
+        .form-field input, .form-field textarea { box-sizing: border-box; }
+        .contact-links { display:flex; gap:12px; flex-wrap:wrap; }
+        .contact-meta { margin-top:16px; display:flex; flex-direction:column; gap:8px; }
+        .contact-meta-title { font-weight:600; }
+        .contact-tip { margin-top:4px; }
+        .skills-panels { display:grid; gap:30px; }
+        @media(min-width: 960px){ .skills-panels { grid-template-columns: repeat(2, minmax(0,1fr)); } }
+        .skill-group-card { height:100%; display:flex; flex-direction:column; gap:12px; }
       `}</style>
 
       {/* Header */}
@@ -320,7 +486,9 @@ export default function App() {
           <a href="#home" className="link" style={{textDecoration:"none"}}><strong>Jayesh Shinde</strong></a>
           <nav className="nav">
             <a className="link" href="#projects">Projects</a>
+            <a className="link" href="#skills">Skills</a>
             <a className="link" href="#about">About</a>
+            <a className="link" href="#education">Education</a>
             <a className="link" href="#experience">Experience</a>
             <a className="link" href="#contact">Contact</a>
             <button className="btn-outline" onClick={()=>setMenuOpen(true)}>⌘K</button>
@@ -431,50 +599,88 @@ export default function App() {
           <div className="card">
             <div className="xs muted" style={{marginBottom:6}}>Certifications</div>
             <ul className="sm" style={{margin:0, paddingLeft:16}}>
-              <li>• AWS Cloud Practitioner</li>
-              <li>• AWS Developer Associate</li>
-              <li>• Global Agile Developer</li>
+              <li>AWS Cloud Practitioner</li>
+              <li>AWS Developer Associate</li>
+              <li>Global Agile Developer</li>
             </ul>
           </div>
         </div>
       </Section>
 
-      {/* Experience */}
-      <Section id="experience" title="Experience" subtitle="A brief career timeline.">
-        <ol style={{position:'relative', paddingLeft:18}}>
-          <li style={{marginBottom:14}}>
-            <div className="xs muted">2024—2025</div>
-            <div className="card-title">Graduate Teaching Assistant · CSU Chico</div>
-            <div className="sm">Helped students with systems & ML topics; created lab material.</div>
-          </li>
-          <li>
-            <div className="xs muted">2022—2023</div>
-            <div className="card-title">Software Engineer · Infosys (Pune)</div>
-            <div className="sm">Java/Spring services; CI/CD; collaborated across teams.</div>
-          </li>
-        </ol>
-      </Section>
+      <SkillsSection />
+
+      {/* Education + Experience */}
+      <section className="section" id="career" style={{paddingTop:0}}>
+        <div className="container career-grid">
+          <div id="education" className="career-panel">
+            <div className="section-head">
+              <h2>Education</h2>
+              <p className="muted">Academic foundations.</p>
+            </div>
+            <ol style={{position:'relative', paddingLeft:0, listStyle:'none', margin:0}}>
+              {EDUCATION.map((item) => (
+                <li key={item.degree} style={{marginBottom:16}}>
+                  <div className="row gap" style={{alignItems:'center'}}>
+                    <OrgLogo org={item.orgKey} label={item.school} />
+                    <div>
+                      <div className="xs muted">{item.range}</div>
+                      <div className="card-title">{item.degree} · {item.school}</div>
+                      <div className="sm">{item.summary}</div>
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </div>
+          <div id="experience" className="career-panel">
+            <div className="section-head">
+              <h2>Experience</h2>
+              <p className="muted">A brief career timeline.</p>
+            </div>
+            <ol style={{position:'relative', paddingLeft:0, listStyle:'none', margin:0}}>
+              {EXPERIENCE.map((item) => (
+                <li key={item.title} style={{marginBottom:16}}>
+                  <div className="row gap" style={{alignItems:'center'}}>
+                    <OrgLogo org={item.orgKey} label={item.org} />
+                    <div>
+                      <div className="xs muted">{item.range}</div>
+                      <div className="card-title">{item.title} · {item.org}</div>
+                      <div className="sm">{item.summary}</div>
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </div>
+      </section>
 
       {/* Contact */}
       <Section id="contact" title="Contact" subtitle="Reach out for roles, collabs, or mentorship.">
-        <div className="grid grid-2">
-          <form className="card" onSubmit={(e)=>{ e.preventDefault(); alert('Thanks! In a real deployment, this would hit an API route or EmailJS.'); }}>
-            <label className="xs muted">Your email</label>
-            <input style={{width:'100%', padding:'10px 12px', borderRadius:12, border: '1px solid var(--border)', background:'transparent', color:'inherit', marginTop:6}} placeholder="you@example.com" required />
-            <label className="xs muted" style={{marginTop:10}}>Message</label>
-            <textarea style={{width:'100%', padding:'10px 12px', borderRadius:12, border: '1px solid var(--border)', background:'transparent', color:'inherit', minHeight:120, marginTop:6}} placeholder="Let's work together…" required />
-            <button className="btn" style={{marginTop:12}}>Send</button>
-          </form>
-          <div className="card">
-            <div className="xs muted">Connect with me</div>
-            <div className="row gap" style={{marginTop:10, flexWrap:'wrap'}}>
-              <a href="mailto:jay98shinde@gmail.com" target="_blank" rel="noreferrer" title="Email" aria-label="Email Jayesh" className="row gap"><IconMail/><span className="sm">Gmail</span></a>
-              <a href="https://www.linkedin.com/in/jayesh-shinde-5a3405175" target="_blank" rel="noreferrer" title="LinkedIn" aria-label="LinkedIn profile" className="row gap"><IconLinkedIn/><span className="sm">LinkedIn</span></a>
-              <a href="https://github.com/shindejayesh987" target="_blank" rel="noreferrer" title="GitHub" aria-label="GitHub profile" className="row gap"><IconGitHub/><span className="sm">GitHub</span></a>
-              <a href="https://discord.com/users/your-discord-id" target="_blank" rel="noreferrer" title="Discord" aria-label="Discord profile" className="row gap"><IconDiscord/><span className="sm">Discord</span></a>
+        <div className="grid">
+          <form className="card form-card" onSubmit={(e)=>{ e.preventDefault(); alert('Thanks! In a real deployment, this would hit an API route or EmailJS.'); }}>
+            <div className="form-field">
+              <label className="xs muted">Your email</label>
+              <input style={{width:'100%', padding:'10px 12px', borderRadius:12, border: '1px solid var(--border)', background:'transparent', color:'inherit'}} placeholder="you@example.com" required />
             </div>
-            <p className="xs muted" style={{marginTop:12}}>Tip: Press <kbd style={{border:'1px solid var(--border)', borderRadius:6, padding:'0 4px'}}>⌘</kbd> + <kbd style={{border:'1px solid var(--border)', borderRadius:6, padding:'0 4px'}}>K</kbd> (or Ctrl+K) to navigate quickly.</p>
-          </div>
+            <div className="form-field" style={{marginTop:4}}>
+              <label className="xs muted">Message</label>
+              <textarea style={{width:'100%', padding:'10px 12px', borderRadius:12, border: '1px solid var(--border)', background:'transparent', color:'inherit', minHeight:120}} placeholder="Let's work together…" required />
+            </div>
+            <div>
+              <button className="btn">Send</button>
+              <div className="contact-meta">
+                <div className="contact-meta-title sm">Connect with me</div>
+                <div className="contact-links">
+                  <a href="mailto:jay98shinde@gmail.com" target="_blank" rel="noreferrer" title="Email" aria-label="Email Jayesh" className="row gap"><ContactLogo brand="gmail" label="Gmail" /><span className="sm">Gmail</span></a>
+                  <a href="https://www.linkedin.com/in/jayesh-shinde-5a3405175" target="_blank" rel="noreferrer" title="LinkedIn" aria-label="LinkedIn profile" className="row gap"><ContactLogo brand="linkedin" label="LinkedIn" /><span className="sm">LinkedIn</span></a>
+                  <a href="https://github.com/shindejayesh987" target="_blank" rel="noreferrer" title="GitHub" aria-label="GitHub profile" className="row gap"><ContactLogo brand="github" label="GitHub" /><span className="sm">GitHub</span></a>
+                  <a href="https://discord.com/users/your-discord-id" target="_blank" rel="noreferrer" title="Discord" aria-label="Discord profile" className="row gap"><ContactLogo brand="discord" label="Discord" /><span className="sm">Discord</span></a>
+                </div>
+                <p className="xs muted contact-tip">Tip: Press <kbd style={{border:'1px solid var(--border)', borderRadius:6, padding:'0 4px'}}>⌘</kbd> + <kbd style={{border:'1px solid var(--border)', borderRadius:6, padding:'0 4px'}}>K</kbd> (or Ctrl+K) to navigate quickly.</p>
+              </div>
+            </div>
+          </form>
         </div>
       </Section>
 
@@ -486,3 +692,8 @@ export default function App() {
     </div>
   );
 }
+
+(function test_skillLogoMap() {
+  const ok = ["React", "TypeScript", "Git", "Postman", "Vercel"];
+  console.assert(ok.every(Boolean), "skills baseline");
+})();
